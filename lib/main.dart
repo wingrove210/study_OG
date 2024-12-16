@@ -108,6 +108,7 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
         actions: [
+          // Cart Icon with counter
           Stack(
             alignment: Alignment.center,
             children: [
@@ -115,20 +116,22 @@ class _MyHomePageState extends State<MyHomePage> {
                 icon: const Icon(Icons.shopping_cart),
                 onPressed: _openCart,
               ),
-              Positioned(
-                right: 4,
-                top: 4,
-                child: CircleAvatar(
-                  radius: 10,
-                  backgroundColor: Colors.red,
-                  child: Text(
-                    '${cartItems.length}',
-                    style: const TextStyle(color: Colors.white, fontSize: 12),
+              if (cartItems.isNotEmpty)
+                Positioned(
+                  right: 4,
+                  top: 4,
+                  child: CircleAvatar(
+                    radius: 10,
+                    backgroundColor: Colors.red,
+                    child: Text(
+                      '${cartItems.length}',
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
+          // Favorites Icon with counter
           Stack(
             alignment: Alignment.center,
             children: [
@@ -136,80 +139,75 @@ class _MyHomePageState extends State<MyHomePage> {
                 icon: const Icon(Icons.favorite),
                 onPressed: _openFavorites,
               ),
-              Positioned(
-                right: 4,
-                top: 4,
-                child: CircleAvatar(
-                  radius: 10,
-                  backgroundColor: Colors.red,
-                  child: Text(
-                    '${favoriteItems.length}',
-                    style: const TextStyle(color: Colors.white, fontSize: 12),
+              if (favoriteItems.isNotEmpty)
+                Positioned(
+                  right: 4,
+                  top: 4,
+                  child: CircleAvatar(
+                    radius: 10,
+                    backgroundColor: Colors.red,
+                    child: Text(
+                      '${favoriteItems.length}',
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
         ],
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('img/iPhone 13 mini - 13.png'), // Используем локальный файл
-            fit: BoxFit.cover,
-          ),
-        ),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Center(
-            child: Wrap(
-              spacing: 16,
-              runSpacing: 16,
-              children: products.map((product) {
-                final isFavorite = favoriteItems.contains(product);
-                return GestureDetector(
-                  onTap: () => _openProductDetails(product),
-                  child: SizedBox(
-                    width: MediaQuery.of(context).size.width / 2 - 24,
-                    child: Card(
-                      elevation: 4,
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              product['image'],
-                              size: 50,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              product['name'],
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              product['price'],
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                            IconButton(
-                              icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
-                              color: isFavorite ? Colors.red : null,
-                              onPressed: () => _toggleFavorite(product),
-                            ),
-                            ElevatedButton(
-                              onPressed: () => _addToCart(product),
-                              child: const Text("Add to Cart"),
-                            ),
-                          ],
-                        ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Center(
+          child: Wrap(
+            spacing: 16,
+            runSpacing: 16,
+            children: products.map((product) {
+              final isFavorite = favoriteItems.contains(product);
+              return GestureDetector(
+                onTap: () => _openProductDetails(product),
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width / 2 - 24,
+                  child: Card(
+                    elevation: 4,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            product['image'],
+                            size: 50,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            product['name'],
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            product['price'],
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                          IconButton(
+                            icon: Icon(isFavorite
+                                ? Icons.favorite
+                                : Icons.favorite_border),
+                            color: isFavorite ? Colors.red : null,
+                            onPressed: () => _toggleFavorite(product),
+                          ),
+                          ElevatedButton(
+                            onPressed: () => _addToCart(product),
+                            child: const Text("Add to Cart"),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                );
-              }).toList(),
-            ),
+                ),
+              );
+            }).toList(),
           ),
         ),
       ),
