@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
 import 'product_details.dart';
 import 'cart_page.dart';
 import 'favorites_page.dart';
+import 'login_page.dart';
+import 'registration_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -33,14 +38,32 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final List<Map<String, dynamic>> products = [
-    {"name": "Diamond Ring", "price": "\$1000", "image": Icons.diamond},
-    {"name": "Gold Necklace", "price": "\$1500", "image": Icons.auto_awesome},
-    {"name": "Silver Bracelet", "price": "\$500", "image": Icons.watch},
-  ];
-
+  List<Map<String, dynamic>> products = [];
   final List<Map<String, dynamic>> cartItems = [];
   final List<Map<String, dynamic>> favoriteItems = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProducts();
+  }
+
+  Future<void> _loadProducts() async {
+    const String apiUrl = 'http://10.0.2.2:8000/products/';
+    try {
+      final response = await http.get(Uri.parse(apiUrl));
+      if (response.statusCode == 200) {
+        final List<dynamic> fetchedProducts = json.decode(response.body);
+        setState(() {
+          products = fetchedProducts.cast<Map<String, dynamic>>();
+        });
+      } else {
+        throw Exception('Failed to load products');
+      }
+    } catch (e) {
+      print('Error loading products: $e');
+    }
+  }
 
   void _openProductDetails(Map<String, dynamic> product) {
     Navigator.push(
@@ -101,61 +124,85 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  void _openLoginPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginPage()),
+    );
+  }
+
+  void _openRegistrationPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const RegistrationPage()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-        actions: [
-          // Cart Icon with counter
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.shopping_cart),
-                onPressed: _openCart,
-              ),
-              if (cartItems.isNotEmpty)
-                Positioned(
-                  right: 4,
-                  top: 4,
-                  child: CircleAvatar(
-                    radius: 10,
-                    backgroundColor: Colors.red,
-                    child: Text(
-                      '${cartItems.length}',
-                      style: const TextStyle(color: Colors.white, fontSize: 12),
-                    ),
+appBar: AppBar(
+  backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+  title: Text(widget.title),
+  actions: [
+    Row(
+      children: [
+        Stack(
+          alignment: Alignment.center,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.shopping_cart),
+              onPressed: _openCart,
+            ),
+            if (cartItems.isNotEmpty)
+              Positioned(
+                right: 4,
+                top: 4,
+                child: CircleAvatar(
+                  radius: 10,
+                  backgroundColor: Colors.red,
+                  child: Text(
+                    '${cartItems.length}',
+                    style: const TextStyle(color: Colors.white, fontSize: 12),
                   ),
                 ),
-            ],
-          ),
-          // Favorites Icon with counter
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.favorite),
-                onPressed: _openFavorites,
               ),
-              if (favoriteItems.isNotEmpty)
-                Positioned(
-                  right: 4,
-                  top: 4,
-                  child: CircleAvatar(
-                    radius: 10,
-                    backgroundColor: Colors.red,
-                    child: Text(
-                      '${favoriteItems.length}',
-                      style: const TextStyle(color: Colors.white, fontSize: 12),
-                    ),
+          ],
+        ),
+        Stack(
+          alignment: Alignment.center,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.favorite),
+              onPressed: _openFavorites,
+            ),
+            if (favoriteItems.isNotEmpty)
+              Positioned(
+                right: 4,
+                top: 4,
+                child: CircleAvatar(
+                  radius: 10,
+                  backgroundColor: Colors.red,
+                  child: Text(
+                    '${favoriteItems.length}',
+                    style: const TextStyle(color: Colors.white, fontSize: 12),
                   ),
                 ),
-            ],
-          ),
-        ],
-      ),
+              ),
+          ],
+        ),
+        TextButton(
+          onPressed: _openLoginPage,
+          child: const Text("Login", style: TextStyle(color: Colors.white)),
+        ),
+        TextButton(
+          onPressed: _openRegistrationPage,
+          child: const Text("Register", style: TextStyle(color: Colors.white)),
+        ),
+      ],
+    ),
+  ],
+),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Center(
@@ -176,7 +223,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
-                            product['image'],
+                            Icons.diamond, // Поставьте реальную иконку, если доступно
                             size: 50,
                             color: Theme.of(context).colorScheme.primary,
                           ),
@@ -187,7 +234,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            product['price'],
+                            product['price'].toString(), // Преобразование в строку
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                           IconButton(
